@@ -43,6 +43,11 @@ yarn-error.*
 # Local env files
 .env*.local
 
+# Virtual environments
+.venv
+.venv/bin
+.venv/lib
+
 # TypeScript
 *.tsbuildinfo
 
@@ -55,4 +60,5 @@ NEXT.md
 RELEASING.md
 STORE_LISTING.md
 PUBLISHING.md
+PROJECT_CONTEXT.md
 /gitignore/

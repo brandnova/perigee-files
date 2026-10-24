@@ -63,11 +63,27 @@ function recentFinished(list: DownloadItem[]): DownloadItem[] {
   .slice(-KEEP_MAX);
 }
 
+// Downloads that were still running are saved as "interrupted", so the next start shows them with a Try again button.
+function asStored(i: DownloadItem): DownloadItem {
+  if (i.status === 'queued' || i.status === 'downloading' || i.status === 'saving') {
+    return {
+      ...i,
+      status: 'failed',
+      progress: 0,
+      bytesPerSecond: null,
+      etaSeconds: null,
+      error: 'This download was interrupted when the app closed. Tap Try again.',
+      finishedAt: Date.now(),
+    };
+  }
+  return i;
+}
+
 async function persistNow(): Promise<void> {
   const file = historyFile();
   if (!file) return;
   try {
-    await fileSystem().writeAsStringAsync(file, JSON.stringify({ v: 1, items: recentFinished(items) }));
+    await fileSystem().writeAsStringAsync(file, JSON.stringify({ v: 1, items: recentFinished(items.map(asStored)) }));
   } catch {
     // the history is a convenience
   }
@@ -190,6 +206,30 @@ export function enqueueDownload(row: FileRow): 'added' | 'exists' {
   emit([...items.filter((i) => i.id !== id), fresh]);
   pump();
   return 'added';
+}
+
+/** Adds many files at once (one update for the whole batch). */
+export function enqueueMany(rows: FileRow[]): { added: number; skipped: number } {
+  let next = [...items];
+  let added = 0;
+  let skipped = 0;
+  for (const row of rows) {
+    const id = `${row.path}@${row.mtime}`;
+    const existing = next.find((i) => i.id === id);
+    if (existing && (existing.status === 'queued' || existing.status === 'downloading' || existing.status === 'saving')) {
+      skipped++;
+      continue;
+    }
+    next = next.filter((i) => i.id !== id);
+    next.push({
+      id, row, status: 'queued', progress: 0, bytesPerSecond: null, etaSeconds: null,
+      error: null, savedAs: null, where: null, addedAt: Date.now(), finishedAt: null,
+    });
+    added++;
+  }
+  emit(next);
+  pump();
+  return { added, skipped };
 }
 
 export function cancelDownload(id: string): void {

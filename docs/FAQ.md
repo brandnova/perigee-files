@@ -55,3 +55,7 @@ The builds aren't code-signed yet, which makes Windows and macOS cautious about 
 ## How do I report a bug?
 
 Dashboard, **Help → Report a problem**: it shows exactly what will be shared (your keys and user name are removed) and lets you copy or download it. Then [open an issue](https://github.com/brandnova/perigee-files/issues) or email brandnova.dev@gmail.com and paste the report in the message..
+
+## How do I download several files, or a whole folder?
+
+In the app, press and hold a file (in Files or Recent), tap more files or folders, then tap **Download**. A folder downloads every file inside it. The files are saved together in your phone's Downloads folder, without the folder structure, and one batch is limited to 500 files.

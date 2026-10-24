@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useActions } from '../actions';
 import { FileListRow, ROW_HEIGHT, subtitleFor } from '../components/FileRow';
+import SelectionBar from '../components/SelectionBar';
+import { useSelection } from '../useSelection';
 import { hasFileFilters, listPinned, listRecent, type FileRow } from '../db/queries';
 import { DEFAULT_FILTERS, activeCount, describe } from '../filters';
 import { useSession } from '../session';
@@ -15,9 +17,10 @@ interface Props {
 
 export default function ListScreen({ kind, onOpenFolder }: Props) {
   const session = useSession();
-  const { showDetails, togglePin, filters, setFilters, spec, openFilters } = useActions();
+  const { showDetails, togglePin, filters, setFilters, spec, openFilters, downloadMany } = useActions();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const selection = useSelection();
 
   const [rows, setRows] = useState<FileRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,6 +48,17 @@ export default function ListScreen({ kind, onOpenFolder }: Props) {
 
   return (
     <View style={styles.root}>
+      {recent && selection.active ? (
+        <SelectionBar
+          rows={selection.rows}
+          onSelectAll={() => selection.addAll(rows)}
+          onDownload={() => {
+            void downloadMany(selection.rows);
+            selection.clear();
+          }}
+          onClose={selection.clear}
+        />
+      ) : (
       <View style={styles.header}>
         <View style={styles.titles}>
           <Text variant="title">{recent ? 'Recent files' : 'Pinned folders'}</Text>
@@ -62,6 +76,7 @@ export default function ListScreen({ kind, onOpenFolder }: Props) {
           />
         ) : null}
       </View>
+      )}
 
       {activeFilters > 0 ? (
         <View style={styles.filterBar}>
@@ -98,13 +113,16 @@ export default function ListScreen({ kind, onOpenFolder }: Props) {
       <FlatList
         style={styles.list}
         data={rows}
+        extraData={selection.revision}
         keyExtractor={(item) => item.path}
         renderItem={({ item }) => (
           <FileListRow
             item={item}
             {...subtitleFor(item, kind)}
-            onPress={recent ? showDetails : (row) => onOpenFolder(row.path)}
-            onLongPress={recent ? undefined : (row) => void togglePin(row.path, row.name)}
+            selecting={recent && selection.active}
+            selected={recent && selection.has(item.path)}
+            onPress={recent ? (row) => (selection.active ? selection.toggle(row) : showDetails(row)) : (row) => onOpenFolder(row.path)}
+            onLongPress={recent ? (row) => selection.toggle(row) : (row) => void togglePin(row.path, row.name)}
             onUnpin={recent ? undefined : (row) => void togglePin(row.path, row.name)}
           />
         )}

@@ -1,44 +1,16 @@
-import {
-  ChevronRight,
-  Copy,
-  EllipsisVertical,
-  FolderOpen,
-  House,
-  Pin,
-  PinOff,
-  Search,
-  SearchX,
-  SlidersHorizontal,
-  X,
-} from 'lucide-react-native';
+import { ChevronRight, Copy, EllipsisVertical, FolderOpen, House, Pin, PinOff, Search, SearchX, SlidersHorizontal, X} from 'lucide-react-native';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useActions } from '../actions';
 import { FileListRow, ROW_HEIGHT, subtitleFor } from '../components/FileRow';
-import {
-  SEARCH_LIMIT,
-  hasFileFilters,
-  isPinned,
-  listFolder,
-  searchFiles,
-  tokenize,
-  type FileRow,
-} from '../db/queries';
+import SelectionBar from '../components/SelectionBar';
+import { useSelection } from '../useSelection';
+import { SEARCH_LIMIT, hasFileFilters, isPinned, listFolder, searchFiles, tokenize, type FileRow} from '../db/queries';
 import { DEFAULT_FILTERS, activeCount, describe } from '../filters';
 import { useDebounced } from '../hooks';
 import { useSession } from '../session';
 import { fonts, radius } from '../theme/tokens';
-import {
-  ActionRow,
-  EmptyState,
-  IconButton,
-  Sheet,
-  SkeletonRows,
-  Text,
-  useTheme,
-  useThemedStyles,
-  type Palette,
-} from '../ui';
+import { ActionRow, EmptyState, IconButton, Sheet, SkeletonRows, Text, useTheme, useThemedStyles, type Palette} from '../ui';
 
 export interface FilesHandle {
   /** Handles the Android back button inside this screen. Returns true if it did something. */
@@ -60,9 +32,10 @@ function parentOf(path: string): string {
 
 const FilesScreen = forwardRef<FilesHandle, Props>(function FilesScreen({ path, onPathChange, focusKey }, ref) {
   const session = useSession();
-  const { showDetails, togglePin, copyFolderPath, filters, setFilters, spec, openFilters } = useActions();
+  const { showDetails, togglePin, copyFolderPath, filters, setFilters, spec, openFilters, downloadMany } = useActions();
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const selection = useSelection();
 
   const [rows, setRows] = useState<FileRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -86,6 +59,10 @@ const FilesScreen = forwardRef<FilesHandle, Props>(function FilesScreen({ path, 
     ref,
     () => ({
       handleBack: () => {
+        if (selection.active) {
+          selection.clear();
+          return true;
+        }
         if (query) {
           setQuery('');
           return true;
@@ -97,7 +74,7 @@ const FilesScreen = forwardRef<FilesHandle, Props>(function FilesScreen({ path, 
         return false;
       },
     }),
-    [query, path, onPathChange],
+    [selection, query, path, onPathChange],
   );
 
   // Focus the search box when asked (e.g. from the Home screen's search).
@@ -161,6 +138,10 @@ const FilesScreen = forwardRef<FilesHandle, Props>(function FilesScreen({ path, 
 
   const onPressRow = useCallback(
     (row: FileRow) => {
+      if (selection.active) {
+        selection.toggle(row);
+        return;
+      }
       if (searchActive) {
         // Folder: open it. File: jump to the folder that contains it.
         setQuery('');
@@ -170,16 +151,16 @@ const FilesScreen = forwardRef<FilesHandle, Props>(function FilesScreen({ path, 
       if (row.isDir) onPathChange(row.path);
       else showDetails(row);
     },
-    [searchActive, onPathChange, showDetails],
+    [selection, searchActive, onPathChange, showDetails],
   );
 
-  // Long-press: a folder toggles its pin, a file shows its details.
+  // Long-press: a file starts (or extends) a selection; a folder toggles its pin, unless a selection is under way.
   const onLongPressRow = useCallback(
     (row: FileRow) => {
-      if (row.isDir) void togglePin(row.path, row.name);
-      else showDetails(row);
+      if (selection.active || !row.isDir) selection.toggle(row);
+      else void togglePin(row.path, row.name);
     },
-    [togglePin, showDetails],
+    [selection, togglePin],
   );
 
   const closeMenuThen = (action: () => void, delayMs = 0) => {
@@ -216,6 +197,17 @@ const FilesScreen = forwardRef<FilesHandle, Props>(function FilesScreen({ path, 
 
   return (
     <View style={styles.root}>
+      {selection.active ? (
+        <SelectionBar
+          rows={selection.rows}
+          onSelectAll={() => selection.addAll(data)}
+          onDownload={() => {
+            void downloadMany(selection.rows);
+            selection.clear();
+          }}
+          onClose={selection.clear}
+        />
+      ) : (
       <View style={styles.topBar}>
         <View style={styles.searchBox}>
           <Search size={18} color={colors.muted} />
@@ -245,6 +237,7 @@ const FilesScreen = forwardRef<FilesHandle, Props>(function FilesScreen({ path, 
           <IconButton icon={EllipsisVertical} label="Folder options" color={colors.text} onPress={() => setMenuOpen(true)} />
         ) : null}
       </View>
+      )}
 
       {activeFilters > 0 ? (
         <View style={styles.filterBar}>
@@ -312,9 +305,17 @@ const FilesScreen = forwardRef<FilesHandle, Props>(function FilesScreen({ path, 
       <FlatList
         style={styles.list}
         data={data}
+        extraData={selection.revision}
         keyExtractor={(item) => item.path}
         renderItem={({ item }) => (
-          <FileListRow item={item} {...subtitleFor(item, mode)} onPress={onPressRow} onLongPress={onLongPressRow} />
+          <FileListRow
+            item={item}
+            {...subtitleFor(item, mode)}
+            selecting={selection.active}
+            selected={selection.has(item.path)}
+            onPress={onPressRow}
+            onLongPress={onLongPressRow}
+          />
         )}
         getItemLayout={(_, index) => ({ length: ROW_HEIGHT, offset: ROW_HEIGHT * index, index })}
         initialNumToRender={20}

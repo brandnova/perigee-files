@@ -138,9 +138,12 @@ Must be finished before any feature that serves file contents.
 - [x] "Report a problem" gets a way to send the report: a support email, web form or issue-tracker link, with Copy and Open mail buttons in the dashboard and the app (the contact is decided at launch) (S)
 - [x] Downloads: a queue with progress, a Downloads list in Settings, and a 30-day history
 - [ ] Downloads that keep going in the background (an Android foreground service) and survive restarts (M)
-- [ ] Select several files, or a whole folder, and download them in one go (M)
-- [ ] Resume interrupted downloads after the app was closed (S)
-- [ ] Take the remaining screenshots (see the list) and add the feature graphic
+- [x] Select several files, or whole folders, and download them in one go (flat in Downloads, limited to 500 files per batch)
+- [x] Interrupted downloads come back with "Try again" after the app restarts
+- [~] Package managers: Homebrew tap and Scoop bucket repos exist and the token is set; the first stable tag publishes to them
+- [ ] Windows arm64 icon resource (check agent/rsrc_windows_*.syso)
+- [ ] Docs: a project context and file map for new chats (docs/PROJECT_CONTEXT.md, docs/FILE_MAP.md, scripts/project-tree.sh)
+- [x] Take the remaining screenshots (see the list) and add the feature graphic
 - [x] Project name chosen: **Perigee Files** (short: Perigee)
 - [x] New icons for the agent and the app, with a script that builds every size (scripts/make-icons.sh)
 - [x] Bottom navigation: the active tab highlight is now a smooth capsule
@@ -192,6 +195,8 @@ Good ideas that don't block anything. Pull one into a milestone when it becomes 
 - [ ] Phone-to-phone transfer through the PC: the agent keeps a small inbox for each paired phone; one phone sends a file to another, and the other phone gets a "new file" notice and downloads it with the queue. It reuses pairing, keys, limits and downloads (M)
 - [ ] Easy cache clearing: a "Clear temporary files" row in the app's Settings (the cached copies and, optionally, the downloads list), and a matching button in the dashboard (S)
 - [ ] Downloads that keep going in the background (an Android foreground service) (M)
+- [ ] Show total release downloads on the landing page: add up GitHub's per-file `download_count` across all releases (skip checksums.txt), show it only once it passes about 100, cache it, and optionally bake it in at build time with a daily scheduled workflow (S). Note it counts file downloads, not people, includes re-downloads and some bots, includes Homebrew and Scoop installs (they fetch the release files), and excludes Play Store installs (add that number by hand in site.json if you want it).
+- [ ] Keep folder structure for folder downloads on Android (needs a save method that accepts subfolders) (M).
 
 ## Changelog
 
@@ -222,3 +227,4 @@ Good ideas that don't block anything. Pull one into a milestone when it becomes 
 - 2026-10-22: Rename pass finished: the discovery service is now `_perigee._tcp`, the dashboard's saved settings use `perigee.*` keys, icons replaced everywhere (agent, Windows, macOS, Linux, app, adaptive, store), macOS app script and release check updated, screenshot plan and README screenshots section prepared.
 - 2026-10-22: Website: a landing page with an orbit-themed hero, a "how it works" stepper, live download links from the latest GitHub release, a screenshot gallery and FAQ, plus the docs and the privacy policy rendered as pages, deployed to GitHub Pages by a workflow.
 - 2026-10-23: Opt-in update check (the PC asks GitHub once a day; the phone shows "Update available"); privacy wording made exact; store listing text, data-safety answers and a feature graphic prepared; Homebrew and Scoop publishing wired into the release; code-signing decisions recorded.
+- 2026-10-24: Multi-select and folder downloads in the app; interrupted downloads are recovered with Try again; release notes and test plan for the update check (rc5); project context, file map and tree script added for moving the work into a Claude Project.

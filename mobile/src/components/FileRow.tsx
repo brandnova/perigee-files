@@ -1,4 +1,4 @@
-import { ChevronRight, PinOff } from 'lucide-react-native';
+import { Check, ChevronRight, PinOff } from 'lucide-react-native';
 import { memo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import type { FileRow } from '../db/queries';
@@ -29,12 +29,23 @@ interface Props {
   item: FileRow;
   subtitle: string;
   headEllipsis?: boolean;
+  selecting?: boolean; // a selection is under way: show the check circle
+  selected?: boolean;
   onPress: (row: FileRow) => void;
   onLongPress?: (row: FileRow) => void;
   onUnpin?: (row: FileRow) => void;
 }
 
-export const FileListRow = memo(function FileListRow({ item, subtitle, headEllipsis, onPress, onLongPress, onUnpin }: Props) {
+export const FileListRow = memo(function FileListRow({
+  item,
+  subtitle,
+  headEllipsis,
+  selecting,
+  selected,
+  onPress,
+  onLongPress,
+  onUnpin,
+}: Props) {
   const { colors } = useTheme();
   const styles = useThemedStyles(makeStyles);
   const { Icon, color } = iconFor(item.ext, item.isDir, colors);
@@ -47,8 +58,9 @@ export const FileListRow = memo(function FileListRow({ item, subtitle, headEllip
       onLongPress={onLongPress ? () => onLongPress(item) : undefined}
       accessibilityRole="button"
       accessibilityLabel={spoken}
-      accessibilityHint={onLongPress ? 'Press and hold for more options' : undefined}
-      style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+      accessibilityState={selecting ? { selected: Boolean(selected) } : undefined}
+      accessibilityHint={selecting ? 'Tap to select or unselect' : onLongPress ? 'Press and hold for more options' : undefined}
+      style={({ pressed }) => [styles.row, selected && styles.selected, pressed && styles.pressed]}
     >
       <View style={[styles.iconBox, { backgroundColor: `${color}22` }]} importantForAccessibility="no-hide-descendants">
         <Icon size={22} color={color} />
@@ -70,7 +82,11 @@ export const FileListRow = memo(function FileListRow({ item, subtitle, headEllip
           </Text>
         ) : null}
       </View>
-      {onUnpin ? (
+      {selecting ? (
+        <View style={[styles.check, selected && styles.checkOn]} importantForAccessibility="no-hide-descendants">
+          {selected ? <Check size={14} color="#FFFFFF" /> : null}
+        </View>
+      ) : onUnpin ? (
         <Pressable onPress={() => onUnpin(item)} hitSlop={14} accessibilityRole="button" accessibilityLabel={`Unpin ${item.name}`}>
           <PinOff size={18} color={colors.muted} />
         </Pressable>
@@ -92,7 +108,10 @@ const makeStyles = (c: Palette) =>
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: c.border,
     },
+    selected: { backgroundColor: c.primarySoft },
     pressed: { backgroundColor: c.surfaceAlt },
     iconBox: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
     text: { flex: 1 },
+    check: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: c.border, alignItems: 'center', justifyContent: 'center' },
+    checkOn: { backgroundColor: c.primary, borderColor: c.primary },
   });

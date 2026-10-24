@@ -115,6 +115,17 @@ export async function listRecent(f: FilterSpec = {}, limit = 100): Promise<FileR
   return rows.map(toRow);
 }
 
+/** Every file inside a folder, at any depth (for "download this folder"). Ask for one more than you accept, to tell "too many". */
+export async function listDescendantFiles(folder: string, limit = 1000): Promise<FileRow[]> {
+  const db = await getDb();
+  const prefix = folder.replace(/[\\%_]/g, '\\$&') + '/%';
+  const rows = await db.getAllAsync<RawRow>(
+    `SELECT ${COLUMNS} FROM files WHERE path LIKE ? ESCAPE '\\' AND is_dir = 0 ORDER BY path LIMIT ?`,
+    [prefix, limit],
+  );
+  return rows.map(toRow);
+}
+
 // ---------- pinned folders ----------
 
 /** Pinned folders that still exist in the index, most recently pinned first. */

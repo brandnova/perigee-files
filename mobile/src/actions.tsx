@@ -1,12 +1,14 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { Alert } from 'react-native'; 
+import { formatSize } from './format';
 import { copyText } from './clipboard';
 import DetailsSheet from './components/DetailsSheet';
 import DownloadsBar from './components/DownloadsBar';
 import DownloadsSheet from './components/DownloadsSheet';
 import FilterSheet from './components/FilterSheet';
 import UploadSheet from './components/UploadSheet';
-import { isPinned, setPinned, type FileRow, type FilterSpec } from './db/queries';
-import { enqueueDownload } from './downloadQueue';
+import { isPinned, listDescendantFiles, setPinned, type FileRow, type FilterSpec } from './db/queries';
+import { enqueueDownload, enqueueMany } from './downloadQueue';
 import { DEFAULT_FILTERS, toSpec, type FilterState } from './filters';
 import { useToast } from './hooks';
 import { fullPcPath } from './pcPaths';
@@ -24,6 +26,7 @@ interface Actions {
   openUpload: () => void;
   download: (row: FileRow) => void; // adds a file to the download queue
   openDownloads: () => void;
+  downloadMany: (rows: FileRow[]) => Promise<void>; // files and folders: folders expand to the files inside
 }
 
 const ActionsContext = createContext<Actions | null>(null);
@@ -33,6 +36,8 @@ export function useActions(): Actions {
   if (!actions) throw new Error('useActions must be used inside ActionsProvider');
   return actions;
 }
+
+const MAX_BATCH = 500;
 
 export function ActionsProvider({ bump, children }: { bump: () => void; children: ReactNode }) {
   const [toast, notify] = useToast();
@@ -93,6 +98,52 @@ export function ActionsProvider({ bump, children }: { bump: () => void; children
     [notify],
   );
 
+  const downloadMany = useCallback(
+    async (rows: FileRow[]) => {
+      const files: FileRow[] = [];
+      const seen = new Set<string>();
+      const add = (f: FileRow) => {
+        if (!seen.has(f.path)) {
+          seen.add(f.path);
+          files.push(f);
+        }
+      };
+      for (const r of rows) {
+        if (r.isDir) (await listDescendantFiles(r.path, MAX_BATCH + 1)).forEach(add);
+        else add(r);
+        if (files.length > MAX_BATCH) break;
+      }
+
+      if (files.length === 0) {
+        notify('There are no files to download in that selection.');
+        return;
+      }
+      if (files.length > MAX_BATCH) {
+        Alert.alert('That is a lot of files', `One batch is limited to ${MAX_BATCH} files. Pick a smaller folder, or select fewer files.`);
+        return;
+      }
+
+      const start = () => {
+        const { added, skipped } = enqueueMany(files);
+        notify(
+          added === 0
+            ? 'Those files are already in your downloads.'
+            : `Added ${added} ${added === 1 ? 'file' : 'files'} to downloads${skipped ? ` (${skipped} already there)` : ''}`,
+        );
+      };
+      const bytes = files.reduce((n, f) => n + f.size, 0);
+      if (files.length > 20 || bytes > 500 * 1024 * 1024) {
+        Alert.alert(`Download ${files.length} files?`, `${formatSize(bytes)} in total. They are saved together in Downloads, without their folders.`, [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Download', onPress: start },
+        ]);
+      } else {
+        start();
+      }
+    },
+    [notify],
+  );
+
   const onDownloadFromSheet = useCallback(
     (row: FileRow) => {
       setDetails(null);
@@ -118,9 +169,10 @@ export function ActionsProvider({ bump, children }: { bump: () => void; children
       openFilters: () => setFiltersOpen(true),
       openUpload: () => setUploadOpen(true),
       download,
+      downloadMany,
       openDownloads: () => setDownloadsOpen(true),
     }),
-    [showDetails, togglePin, copyFolderPath, notify, filters, spec, download],
+    [showDetails, togglePin, copyFolderPath, notify, filters, spec, download, downloadMany],
   );
 
   return (

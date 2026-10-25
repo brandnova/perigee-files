@@ -125,6 +125,7 @@ docs/
   API.md
   FAQ.md
   FEATURES.md
+  FILE_MAP.md
   GETTING_STARTED.md
   images/
     agent/

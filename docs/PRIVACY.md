@@ -44,6 +44,10 @@ All of this stays on your phone. **Unpair this PC** deletes the pairing, the fil
 - **Local network and internet access**: to talk to your PC. (Android calls this the "internet" permission; it is used only for your local network.)
 - **Storage (Android 9 and older only)**: to save downloads to the Downloads folder.
 
+## The website
+
+The website is hosted on GitHub Pages. It has no cookies and no analytics. To show the newest release and its download links, your browser asks GitHub's public releases list, so GitHub sees your IP address, as any website would. Nothing else is sent.
+
 ## Third parties
 
 None receive your data. Google Play and the App Store may collect their own diagnostic information when you install the app, under their own policies.

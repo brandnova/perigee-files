@@ -10,5 +10,6 @@
   "brandUrl": "https://brandnova.pythonanywhere.com",
   "playStoreUrl": "",
   "appStoreUrl": "",
+  "showDownloadsFrom": 100,
   "version": "0.1.0-rc5"
 }

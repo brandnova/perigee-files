@@ -124,46 +124,42 @@ Must be finished before any feature that serves file contents.
 - [x] Upload from phone into a single configured drop folder on the PC (M, needs Milestone 5)
 
 ## Milestone 7: Pre-launch polish
-- [x] **Decide the project name** (blocks the items marked *) 
-- [x] * Rename pass: constants, package IDs, the discovery service name, packaging files, docs, repo (M)
+- [x] Project name chosen: **Perigee Files** (short: Perigee), and the rename pass (constants, IDs, discovery service, packaging, docs, repo)
+- [x] New icons for the agent and the app, with a script that builds every size (scripts/make-icons.sh)
 - [x] Docs organized: README, docs index, getting started, FAQ, security model, security policy, privacy policy, API reference
-- [x] Refresh the screenshots, including the new dashboard (S)
-- [x] Third-party licence notices: the generator is ready (scripts/licenses.sh); run it and review (S)
-- [x] * Hosted privacy policy and a support contact (the Markdown is written; hosting waits for the name) (S)
-- [x] * Landing page on GitHub Pages: what it is, how it works, downloads, FAQ, privacy (M)
-- [x] The app's first-run walkthrough explains the file-access and upload switches in the dashboard (S)
-- [x] An opt-in "update available" hint in the agent and the app (S, optional)
-- [x] * Store paperwork: accounts, listing text, screenshots, data-safety and privacy forms (M)
-- [x] Code signing and notarization decisions for Windows and macOS (M)
-- [x] "Report a problem" gets a way to send the report: a support email, web form or issue-tracker link, with Copy and Open mail buttons in the dashboard and the app (the contact is decided at launch) (S)
+- [x] Third-party licence notices generated and reviewed (scripts/licenses.sh)
+- [x] Screenshots refreshed, feature graphic added
+- [x] Hosted privacy policy and a support contact
+- [x] Landing page on GitHub Pages, built by `site/`, with live download links and a total-downloads counter
+- [x] The app's first-run walkthrough explains the file-access and upload switches in the dashboard
+- [x] An opt-in "update available" hint in the agent and the app
+- [x] Store paperwork written (listings, data-safety answers, reviewer notes): docs/STORE_LISTING.md, docs/PUBLISHING.md
+- [x] Code signing decisions: ship unsigned for launch; SignPath Foundation (Windows) and Apple notarization after launch
+- [x] "Report a problem" shows how to send the report (support email, GitHub issues), in the dashboard and the app
 - [x] Downloads: a queue with progress, a Downloads list in Settings, and a 30-day history
-- [ ] Downloads that keep going in the background (an Android foreground service) and survive restarts (M)
 - [x] Select several files, or whole folders, and download them in one go (flat in Downloads, limited to 500 files per batch)
 - [x] Interrupted downloads come back with "Try again" after the app restarts
-- [~] Package managers: Homebrew tap and Scoop bucket repos exist and the token is set; the first stable tag publishes to them
-- [ ] Windows arm64 icon resource (check agent/rsrc_windows_*.syso)
-- [ ] Docs: a project context and file map for new chats (docs/PROJECT_CONTEXT.md, docs/FILE_MAP.md, scripts/project-tree.sh)
-- [x] Take the remaining screenshots (see the list) and add the feature graphic
-- [x] Project name chosen: **Perigee Files** (short: Perigee)
-- [x] New icons for the agent and the app, with a script that builds every size (scripts/make-icons.sh)
-- [x] Bottom navigation: the active tab highlight is now a smooth capsule
-- [x] The app no longer requests the microphone permission
+- [x] Bottom navigation highlight polished; the app no longer requests the microphone permission
+- [x] A project context, file map and tree script for new chats (docs/PROJECT_CONTEXT.md, docs/FILE_MAP.md, scripts/project-tree.sh)
+- [ ] Windows arm64 icon resource (run `go-winres make --arch amd64,386,arm64`, then check agent/rsrc_windows_*.syso)
 
 ## Milestone 8: Publishing
 - [x] Linux packages (.deb, .rpm) on every release
-- [~] Homebrew tap and Scoop bucket: wired into the release (needs the two repos and the PACKAGE_REPOS_TOKEN secret)
-- [ ] winget: manual first submission when v0.1.0 is out
+- [~] Homebrew tap and Scoop bucket: repos and token are ready; the first stable tag publishes to them
+- [ ] winget: manual first submission once v0.1.0 is out
+- [ ] AUR package (`perigee-bin`) once v0.1.0 is out; COPR or a hosted APT/RPM repository later, if people ask
 - [ ] Windows code signing via SignPath Foundation (after launch)
 - [ ] macOS Developer ID signing and notarization in a macOS runner job (with the Apple account)
-- [ ] Google Play: account, closed test (12 testers, 14 days), data safety, production
-- [ ] App Store: TestFlight test on a real iPhone, review
+- [ ] Google Play: company account (waiting on a D-U-N-S number), listing, data safety, a test track (the 12-tester closed test only if the account type requires it), production
+- [ ] Android developer verification: check whether it applies to the APK downloads, and register
+- [ ] App Store: Apple Developer account, TestFlight test on a real iPhone, review
 - [ ] OTA updates for JS-only fixes via EAS Update (optional)
 - [ ] Localization and accessibility pass
 - [x] Third-party licence notices generated by tooling
 
 ### Why this order
 - **Release-ready comes first** because a few things are painful to retrofit once people use the app: where the config lives, the version number, and the project name.
-- **TLS comes before downloads.** In my earlier order I put downloads first, and I'm changing that. File names are sensitive, but file contents are more so, and plain HTTP on a shared Wi-Fi exposes them.
+- **Encryption was planned before file access, and the order changed.** Instead, file access and uploads ship **off by default**, with trusted-network notices everywhere, and encrypting the connection is the first item after launch.
 - **Look and feel comes before the stores,** but after the quick wins, so the polish pass covers the final feature set.
 - **Delta sync and the file watcher wait for real numbers.** If the smoke test shows your index syncs in seconds, they may never be worth building.
 
@@ -178,25 +174,25 @@ Good ideas that don't block anything. Pull one into a milestone when it becomes 
 - [ ] Disk-usage view (biggest folders and file types) in the dashboard and on the phone
 - [ ] Duplicate finder (same name and size candidates)
 - [ ] Per-device approval: "Allow Pixel 8?" the first time a phone connects (builds on per-device tokens)
-- [ ] Update notifier (opt-in check against GitHub releases)
-- [ ] Diagnostics export (version, OS and settings with the token removed) for bug reports
-- [ ] Log viewer in the dashboard, with a rolling log file
-- [ ] "Open in file manager" link per folder
+- [x] Update notifier (shipped in rc5: opt-in check against GitHub releases; the phone is told by the PC)
+- [x] Diagnostics export (shipped: Help, Report a problem)
+- [x] Log viewer in the dashboard, with a rolling log file (shipped)
+- [ ] "Open in file manager" link per shared folder (the drop folder already has one)
 - [ ] Several PCs in one app (one database per PC, a PC switcher)
 - [ ] The phone as an extra source (index its own files into the same search)
 - [ ] Faster syncing: delta sync, a file watcher on the agent, resumable transfers (only if real numbers show it's needed)
 - [ ] Smarter search: fuzzy matching and SQLite FTS5
 - [ ] Remote access through a hosted relay (long term; it would need a subscription to cover server costs, and it changes the "nothing leaves your network" promise)
 - [ ] Include the "Check my setup" results in the problem report (S)
-- [ ] Encrypt the phone-to-PC connection (a key exchange from the pairing code, then authenticated encryption of requests and the file list) (L)
-- [ ] Save a file straight into a chosen folder on the phone (Android: the folder picker, with large-file safe streaming) (M)
+- [ ] **Encrypt the phone-to-PC connection** (a key exchange from the pairing code, then authenticated encryption of requests and the file list): the first item after launch (L)
+- [ ] Let the person choose where downloads go, and keep the folder structure for folder downloads on Android (needs a save method that accepts subfolders) (M)
 - [ ] Share files to the app from other apps ("Send to PC" in the Android share sheet) (M)
 - [ ] Receive whole folders, and a "received files" list in the dashboard (S)
 - [ ] Phone-to-phone transfer through the PC: the agent keeps a small inbox for each paired phone; one phone sends a file to another, and the other phone gets a "new file" notice and downloads it with the queue. It reuses pairing, keys, limits and downloads (M)
 - [ ] Easy cache clearing: a "Clear temporary files" row in the app's Settings (the cached copies and, optionally, the downloads list), and a matching button in the dashboard (S)
-- [ ] Downloads that keep going in the background (an Android foreground service) (M)
-- [ ] Show total release downloads on the landing page: add up GitHub's per-file `download_count` across all releases (skip checksums.txt), show it only once it passes about 100, cache it, and optionally bake it in at build time with a daily scheduled workflow (S). Note it counts file downloads, not people, includes re-downloads and some bots, includes Homebrew and Scoop installs (they fetch the release files), and excludes Play Store installs (add that number by hand in site.json if you want it).
-- [ ] Keep folder structure for folder downloads on Android (needs a save method that accepts subfolders) (M).
+- [ ] Downloads that keep going in the background (an Android foreground service) and survive restarts (M)
+- [ ] Byte-level resume of downloads: continue a partial file with a Range request instead of starting again (S)
+- [x] Show total release downloads on the landing page (shipped: the sum of GitHub's per-file `download_count`, skipping checksums.txt; shown once it passes 100; counts file downloads, not people, and includes Homebrew and Scoop installs but not Play Store installs)
 
 ## Changelog
 
@@ -228,3 +224,4 @@ Good ideas that don't block anything. Pull one into a milestone when it becomes 
 - 2026-10-22: Website: a landing page with an orbit-themed hero, a "how it works" stepper, live download links from the latest GitHub release, a screenshot gallery and FAQ, plus the docs and the privacy policy rendered as pages, deployed to GitHub Pages by a workflow.
 - 2026-10-23: Opt-in update check (the PC asks GitHub once a day; the phone shows "Update available"); privacy wording made exact; store listing text, data-safety answers and a feature graphic prepared; Homebrew and Scoop publishing wired into the release; code-signing decisions recorded.
 - 2026-10-24: Multi-select and folder downloads in the app; interrupted downloads are recovered with Try again; release notes and test plan for the update check (rc5); project context, file map and tree script added for moving the work into a Claude Project.
+- 2026-10-25: Published v0.1.0-rc5 (pre-release): opt-in update check, multi-select and folder downloads, interrupted downloads recovered, a total-downloads counter on the landing page, and the project context and file map for new chats.

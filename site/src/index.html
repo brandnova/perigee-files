@@ -60,6 +60,7 @@
           <p class="fine">
             <span x-text="$store.rel.tag">v{{version}}</span>
             <span x-show="$store.rel.isPre"> · pre-release</span> · MIT licensed · for Windows, macOS, Linux and Android
+            <span x-show="$store.rel.showDownloads" style="display:none"> · <span x-text="$store.rel.downloadsText" title="Total downloads of all releases, counted by GitHub"></span> downloads</span>
           </p>
         </div>
 
@@ -260,6 +261,7 @@
           <span x-show="$store.rel.state === 'ready'" style="display:none">
             Latest: <strong x-text="$store.rel.tag"></strong><span x-show="$store.rel.isPre"> (pre-release)</span> · <span x-text="$store.rel.date"></span> ·
             <a :href="$store.rel.notesUrl" href="{{releasesUrl}}">Release notes</a>
+            <span x-show="$store.rel.showDownloads" style="display:none"> · <span x-text="$store.rel.downloadsText"></span> downloads so far</span>
           </span>
         </p>
 

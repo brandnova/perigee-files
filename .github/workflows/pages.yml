@@ -8,6 +8,8 @@ on:
       - "docs/**"
       - "SECURITY.md"
       - ".github/workflows/pages.yml"
+  schedule:
+    - cron: "23 4 * * *" # once a day, so the baked download number stays fresh
   workflow_dispatch:
 
 permissions:
@@ -33,6 +35,8 @@ jobs:
         working-directory: site
       - run: npm run build
         working-directory: site
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

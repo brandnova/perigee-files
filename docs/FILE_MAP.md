@@ -12,7 +12,7 @@ Paths are from the repo root. "Ask for" means: before changing the feature, requ
 | Pairing and devices | agent/pairing.go (old token QR), pairing_code.go, paircodes.go, devices.go, webui_pairing.go, pair_api_test.go |
 | File access (downloads from PC) | agent/download.go, webui_access.go, download_test.go |
 | Uploads (phone to PC) | agent/uploads.go, uploadsettings.go, webui_uploads_open.go, upload_test.go, webui_uploads_test.go |
-| Update check | agent/updatecheck.go, webui_update.go, server.go (ping field), brand.go, tests; dashboard bits in web/ |
+| Update check | agent/updatecheck.go, webui_update.go, server.go (ping field), brand.go, tests; dashboard bits in web/; app: mobile/src/version.ts, screens/SettingsScreen.tsx (About), types.ts (ping field) |
 | Dashboard backend | agent/webui.go, webui_*.go, events.go, logger.go, webui_logs.go, report.go |
 | Dashboard frontend | agent/web/templates/index.html, locked.html, web/static/app.js, style.css, theme.js |
 | Terminal UX, start-up, background | agent/main.go, console*.go, banner.go, explain.go, launch.go, detach_*.go, explorer_*.go, brand.go |
@@ -31,7 +31,7 @@ Paths are from the repo root. "Ask for" means: before changing the feature, requ
 | Settings screen (app) | src/screens/SettingsScreen.tsx, src/version.ts, src/brand.ts, components/BrandFooter.tsx, TrustNotice.tsx |
 | Theme and UI kit | src/theme/*, src/ui/* |
 | App build config | mobile/app.json, eas.json, package.json, tsconfig.json |
-| Website | site/build.mjs, site.json, package.json, src/index.html, docs.html, 404.html, src/assets/app.js, style.css, partials/*, .github/workflows/pages.yml |
+| Website | site/build.mjs, site.json, package.json, src/index.html, docs.html, 404.html, src/assets/app.js, style.css, partials/*, .github/workflows/pages.yml (also: the release download links and the total-downloads counter) |
 | Release and packaging | .goreleaser.yaml, .github/workflows/release.yml, ci.yml, scripts/*, packaging/linux/perigee.desktop, branding/* |
 | Docs | README.md, SECURITY.md, docs/*.md (API, FAQ, GETTING_STARTED, PRIVACY, SECURITY_MODEL, FEATURES), THIRD_PARTY_NOTICES.md (generated) |
 
@@ -45,24 +45,26 @@ Paths are from the repo root. "Ask for" means: before changing the feature, requ
 | `.nosync` private-folder marker | Crawler skips folders with the marker; explain it in the path tester | agent/crawler.go, crawler_test.go, rules.go, docs/GETTING_STARTED.md |
 | Disk-usage view | Sizes by folder and type (agent stat endpoint, app query) | agent/webui.go, snapshot.go, web/*, mobile/src/db/queries.ts, screens/HomeScreen.tsx |
 | Duplicate finder | SQL on name and size; a list screen | mobile/src/db/queries.ts, screens/*, tabs in components/TabBar.tsx and App.tsx |
-| Per-device approval | A pending state for new phones; approve in the dashboard | agent/server.go (pairHandler), devices.go, webui_pairing.go, web/*, mobile/src/pairing.ts, PairScreen.tsx, api/client.ts |
+| Per-device approval | A pending state for new phones; approve in the dashboard | agent/server.go (pairHandler), devices.go, webui_pairing.go, web/*, mobile/src/pairing.ts, screens/PairScreen.tsx, api/client.ts |
+| "Open in file manager" link per shared folder | An endpoint that calls `openFolder` for a shared folder, a button on the folder card | agent/webui_folders.go, launch.go, web/static/app.js (the folder card), agent/webui.go |
 | Several PCs in one app | One database per PC; a PC switcher | mobile/src/pairing.ts, db/index.ts, session.tsx, App.tsx, sync.ts, pcPaths.ts, screens/SettingsScreen.tsx, HomeScreen.tsx |
 | Phone as an extra source | Index the phone's own files; media permissions | mobile/src/db/*, sync.ts, screens/FilesScreen.tsx, app.json |
 | Faster sync (delta, watcher, resume) | Agent file watcher, an API `since` parameter, incremental app sync (API additive) | agent/indexer.go, crawler.go, server.go, docs/API.md, mobile/src/sync.ts, db/* |
 | Smarter search (FTS5, fuzzy) | A schema migration and new queries | mobile/src/db/index.ts, queries.ts, sync.ts |
+| Remote access through a relay | A hosted service; changes the privacy model, so it needs a design discussion first | docs/PRIVACY.md, SECURITY_MODEL.md, agent/server.go, mobile/src/api/client.ts, session.tsx, pairing.ts, site/src/index.html |
 | Check-my-setup in the problem report | Add doctor results to the report text | agent/report.go, webui_logs.go, doctor.go |
 | Encrypt the connection | New handshake from the pairing code, authenticated encryption of requests and bodies; changes API docs, banners and privacy wording | agent/server.go, pairing_code.go, paircodes.go, devices.go, webui_pairing.go, mobile/src/api/client.ts, files.ts, upload.ts, pairing.ts, docs/API.md, SECURITY_MODEL.md, PRIVACY.md, site/src/index.html, components/TrustNotice.tsx, the dashboard banners |
-| Keep folder structure for folder downloads (Android) | A save method that takes subfolders (native or SAF) | mobile/src/downloads.ts, downloadQueue.ts, app.json, package.json |
+| Choose the download folder, keep folder structure (Android) | A save method that takes subfolders or a chosen folder (native or SAF) | mobile/src/downloads.ts, downloadQueue.ts, files.ts, app.json, package.json |
 | Share to the app from other apps | Android intent filter via a config plugin; hand shared files to the upload sheet | mobile/app.json, App.tsx, useUpload.ts, upload.ts, actions.tsx |
 | Received-files list and whole-folder upload | Agent keeps a list; app picks folders | agent/uploads.go, webui_*.go, web/*, mobile/src/upload.ts, useUpload.ts |
 | Phone-to-phone through the PC | An inbox per phone on the agent, "new file" notice, reuse the download queue | agent/devices.go, server.go, uploads.go, download.go, new inbox file, mobile/src/api/client.ts, actions.tsx, downloadQueue.ts, UploadSheet.tsx |
 | Clear temporary files | Settings rows (app) and a dashboard button | mobile/src/screens/SettingsScreen.tsx, files.ts (clearOpenedFiles), downloadQueue.ts, agent/webui*.go, web/* |
 | Background downloads (foreground service) | A native library; the queue must survive the app closing | mobile/src/downloadQueue.ts, files.ts, app.json, package.json |
 | Byte-level resume of downloads | Use Range with a saved partial file | mobile/src/files.ts, downloadQueue.ts |
-| Download counts on the landing page | Sum GitHub's per-file download_count | site/src/assets/app.js, site/src/index.html, site/build.mjs, .github/workflows/pages.yml |
+| Windows arm64 icon resource | Rebuild the resource files for every architecture | agent/winres/*, agent/rsrc_windows_*.syso, scripts/make-icons.sh |
 | iPhone release | Build, discovery, permissions, save to Files | mobile/app.json, eas.json, src/discovery/index.ts, downloads.ts (iOS branch), platform/*, docs/STORE_LISTING.md |
 | Store releases (Play, App Store) | Accounts, listings, data-safety forms | docs/STORE_LISTING.md, docs/PUBLISHING.md, mobile/eas.json, app.json |
-| Package managers (winget, AUR, COPR) | Manifests and release wiring | .goreleaser.yaml, .github/workflows/release.yml, new packaging/* |
+| Package managers (winget, AUR, COPR, APT) | Manifests and release wiring | .goreleaser.yaml, .github/workflows/release.yml, new packaging/* |
 | Code signing and notarization | SignPath (Windows), a macOS runner job (Apple) | .github/workflows/release.yml, .goreleaser.yaml, scripts/make-macapp.sh |
 | Localization | Move UI strings out of components | mobile/src/screens/*, components/*, agent/web/*, docs |
 | OTA updates (EAS Update) | expo-updates config | mobile/app.json, eas.json, package.json |

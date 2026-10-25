@@ -32,6 +32,28 @@ async function copyIfExists(from, to) {
   return true;
 }
 
+// The total number of release downloads (every file of every release, apart from checksums.txt), or null.
+async function fetchDownloadTotal() {
+  const headers = { Accept: 'application/vnd.github+json', 'User-Agent': 'perigee-site-build' };
+  if (process.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+  try {
+    let total = 0;
+    for (let page = 1; page <= 5; page++) {
+      const res = await fetch(`https://api.github.com/repos/${cfg.repo}/releases?per_page=100&page=${page}`, { headers });
+      if (!res.ok) return null;
+      const list = await res.json();
+      for (const r of list) {
+        if (r.draft) continue;
+        for (const a of r.assets) if (a.name !== 'checksums.txt') total += a.download_count || 0;
+      }
+      if (list.length < 100) break;
+    }
+    return total;
+  } catch {
+    return null;
+  }
+}
+
 function pngSize(buf) {
   if (buf.length < 24 || buf.readUInt32BE(0) !== 0x89504e47) return { w: 1280, h: 800 };
   return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) };
@@ -151,7 +173,12 @@ const jsonld = {
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
   author: { '@type': 'Organization', name: cfg.brandName, url: cfg.brandUrl },
 };
-const clientConfig = { repo: cfg.repo, email: cfg.email, playStoreUrl: cfg.playStoreUrl, appStoreUrl: cfg.appStoreUrl, version: cfg.version };
+const downloads = (await fetchDownloadTotal()) ?? 0;
+console.log(`  release downloads so far: ${downloads}`);
+const clientConfig = {
+  repo: cfg.repo, email: cfg.email, playStoreUrl: cfg.playStoreUrl, appStoreUrl: cfg.appStoreUrl, version: cfg.version,
+  downloads, downloadsMin: cfg.showDownloadsFrom ?? 100,
+};
 await write(
   'index.html',
   fill(await readSrc('index.html'), {

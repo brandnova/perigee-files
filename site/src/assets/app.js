@@ -33,19 +33,24 @@ document.addEventListener('alpine:init', () => {
   };
 
   async function loadRelease() {
-    const key = 'perigee.release';
+    const key = 'perigee.release.v2';
     try {
       const cached = JSON.parse(sessionStorage.getItem(key) || 'null');
       if (cached && Date.now() - cached.at < 10 * 60 * 1000) return cached.data;
     } catch (e) { /* no storage */ }
     try {
-      const res = await fetch(`https://api.github.com/repos/${cfg.repo}/releases?per_page=8`, { headers: { Accept: 'application/vnd.github+json' } });
+      const res = await fetch(`https://api.github.com/repos/${cfg.repo}/releases?per_page=100`, { headers: { Accept: 'application/vnd.github+json' } });
       if (!res.ok) return null;
       const list = (await res.json()).filter((r) => !r.draft).sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
       if (!list.length) return null;
+      // Every download of every file, except the checksums list (people fetch it to verify, not to install).
+      const downloads = list.reduce(
+        (sum, rel) => sum + rel.assets.filter((a) => a.name !== 'checksums.txt').reduce((s, a) => s + (a.download_count || 0), 0),
+        0,
+      );
       const r = list[0];
       const data = {
-        tag_name: r.tag_name, prerelease: r.prerelease, published_at: r.published_at, html_url: r.html_url,
+        tag_name: r.tag_name, prerelease: r.prerelease, published_at: r.published_at, html_url: r.html_url, downloads,
         assets: r.assets.map((a) => ({ name: a.name, size: a.size, browser_download_url: a.browser_download_url })),
       };
       try { sessionStorage.setItem(key, JSON.stringify({ at: Date.now(), data })); } catch (e) { /* ignore */ }
@@ -70,6 +75,9 @@ document.addEventListener('alpine:init', () => {
     get isPre() { return this.release ? this.release.prerelease : /-/.test(cfg.version); },
     get date() { return this.release ? new Date(this.release.published_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : ''; },
     get notesUrl() { return this.release ? this.release.html_url : releasesUrl; },
+    get downloads() { return this.release && typeof this.release.downloads === 'number' ? this.release.downloads : (cfg.downloads || 0); },
+    get showDownloads() { return this.downloads >= (cfg.downloadsMin || 100); },
+    get downloadsText() { return new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 }).format(this.downloads); },
     find(kind) { return this.release && this.release.assets.find((a) => ASSET[kind].test(a.name)); },
     url(kind) { const a = this.find(kind); return a ? a.browser_download_url : releasesUrl; },
     size(kind) { const a = this.find(kind); return a ? (a.size / 1048576).toFixed(a.size > 10485760 ? 0 : 1) + ' MB' : ''; },

@@ -90,7 +90,7 @@ func (ui *WebUI) handleReport(rw http.ResponseWriter, r *http.Request, _ *sessio
 
 	rw.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	if r.URL.Query().Get("download") == "1" {
-		rw.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="fsagent-report-%s.txt"`, time.Now().Format("2006-01-02")))
+		rw.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="perigee-report-%s.txt"`, time.Now().Format("2006-01-02")))
 	}
 	_, _ = io.WriteString(rw, text)
 }

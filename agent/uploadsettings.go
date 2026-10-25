@@ -37,7 +37,7 @@ func validateDropFolder(raw, configPath string) (string, error) {
 		return "", errors.New("That folder holds (or contains) the agent's own settings. Pick a different one.")
 	}
 
-	probe, err := os.CreateTemp(real, ".fsindexer-write-test-*")
+	probe, err := os.CreateTemp(real, ".perigee-write-test-*")
 	if err != nil {
 		return "", errors.New("The agent can't write to that folder. Pick another one.")
 	}

@@ -185,7 +185,7 @@ func showErrorInBrowser(f friendlyError) {
 		template.HTMLEscapeString(f.Detail),
 		template.HTMLEscapeString(fix),
 	)
-	path := filepath.Join(os.TempDir(), "fsagent-error.html")
+	path := filepath.Join(os.TempDir(), "perigee-error.html")
 	if err := os.WriteFile(path, []byte(page), 0o600); err != nil {
 		return
 	}

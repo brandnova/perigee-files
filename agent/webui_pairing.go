@@ -144,7 +144,7 @@ func (ui *WebUI) handleLegacyToken(rw http.ResponseWriter, r *http.Request, _ *s
 
 // ---------- calls from another copy of the agent (secret required) ----------
 
-// handleInternalPair is what  fsagent -pair  calls.
+// handleInternalPair is what  perigee -pair  calls.
 func (ui *WebUI) handleInternalPair(rw http.ResponseWriter, r *http.Request) {
 	if !ui.secretOK(r) {
 		writeJSON(rw, http.StatusForbidden, map[string]string{"error": "forbidden"})

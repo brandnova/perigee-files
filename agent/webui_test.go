@@ -486,7 +486,7 @@ func TestFileURL(t *testing.T) {
 	if os.PathSeparator != '/' {
 		t.Skip("checks Unix-style paths")
 	}
-	if got := fileURL("/tmp/fsagent-error.html"); got != "file:///tmp/fsagent-error.html" {
+	if got := fileURL("/tmp/perigee-error.html"); got != "file:///tmp/perigee-error.html" {
 		t.Errorf("fileURL = %q", got)
 	}
 }

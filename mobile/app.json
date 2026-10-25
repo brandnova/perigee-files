@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "FS Browser",
+    "name": "Perigee",
     "slug": "fs-indexer",
     "version": "0.1.0",
     "orientation": "portrait",
@@ -14,9 +14,9 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.brandnova.fsindexer",
+      "bundleIdentifier": "com.brandnova.perigee",
       "infoPlist": {
-        "NSLocalNetworkUsageDescription": "Connect to your PC on the local network to sync its file index.",
+        "NSLocalNetworkUsageDescription": "Perigee connects to your PC on your local network to read its file list.",
         "NSBonjourServices": [
           "_perigee._tcp"
         ],
@@ -27,7 +27,7 @@
       }
     },
     "android": {
-      "package": "com.brandnova.fsindexer",
+      "package": "com.brandnova.perigee",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -38,8 +38,10 @@
         "android.permission.ACCESS_WIFI_STATE",
         "android.permission.CHANGE_WIFI_MULTICAST_STATE",
         "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO",
         "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -59,7 +61,9 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to scan the pairing QR code shown by your PC."
+          "cameraPermission": "Allow $(PRODUCT_NAME) to scan the pairing QR code shown by your PC.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
         }
       ],
       "expo-font",

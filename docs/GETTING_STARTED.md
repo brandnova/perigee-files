@@ -52,11 +52,11 @@ Both are off until you turn them on, and the dashboard explains the trade-off fi
 
 ## Start on login
 
-Dashboard, **Settings**, **Start when I sign in**, or run `perigee-autostart on`. The agent then starts quietly and never opens a window by itself. Open the dashboard any time with `perigee-ui`, or from the app menu.
+Dashboard, **Settings**, **Start when I sign in**, or run `perigee -autostart on`. The agent then starts quietly and never opens a window by itself. Open the dashboard any time with `perigee -ui`, or from the app menu.
 
 ## If something doesn't work
 
-Open the dashboard, then **Help → Check my setup**. It tests your settings, folders, network, ports and firewall, and says what to fix. From a terminal: `perigee-doctor`. See the [FAQ](FAQ.md).
+Open the dashboard, then **Help → Check my setup**. It tests your settings, folders, network, ports and firewall, and says what to fix. From a terminal: `perigee -doctor`. See the [FAQ](FAQ.md).
 
 ## Command line
 
@@ -71,7 +71,7 @@ Open the dashboard, then **Help → Check my setup**. It tests your settings, fo
 | `-background` | Run with no window |
 | `-config <file>` | Use another settings file |
 | `-host <ip>` | Use this address in the pairing code |
-| `-no-mdns`, `-no-web`, `-no-open`, `-no-qr`, `-quiet`, `-no-color`, `-verbose` | Fine tuning (see `perigee-h`) |
+| `-no-mdns`, `-no-web`, `-no-open`, `-no-qr`, `-quiet`, `-no-color`, `-verbose` | Fine tuning (see `perigee -h`) |
 | `-rotate-token` | Replace the old shared token (phones paired with a code are unaffected) |
 | `-version` | Show the version |
 
@@ -85,8 +85,8 @@ Open the dashboard, then **Help → Check my setup**. It tests your settings, fo
 
 ## Uninstall
 
-1. Dashboard, **Settings**: switch **Start when I sign in** off (or run `perigee-autostart off`).
-2. Quit the agent (**Quit the agent** in the dashboard, or `perigee-stop`).
+1. Dashboard, **Settings**: switch **Start when I sign in** off (or run `perigee -autostart off`).
+2. Quit the agent (**Quit the agent** in the dashboard, or `perigee -stop`).
 3. Remove the program: delete the app (Windows/macOS), or `sudo dnf remove perigee` / `sudo apt remove perigee`.
 4. Delete the settings folder shown above if you want everything gone.
 5. On the phone: in the app, **Settings → Unpair this PC**, then uninstall the app. Files you saved in Downloads stay until you delete them.

@@ -1,7 +1,7 @@
 # Privacy policy
 
 **Perigee Files** (the agent for your computer, and the app for your phone)
-Last updated: 20 October 2026
+Last updated: 23 October 2026
 
 ## The short version
 

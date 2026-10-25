@@ -20,7 +20,7 @@ import (
 //go:embed web
 var webFS embed.FS
 
-const sessionCookie = "fsagent_session"
+const sessionCookie = "perigee_session"
 
 // WebOptions is everything the dashboard needs from the rest of the agent.
 type WebOptions struct {

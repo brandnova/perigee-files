@@ -58,7 +58,7 @@ func PrintPairingCode(c *Console, cfg *Config, host string, codes *PairingCodes,
 	}
 }
 
-// runPairCommand is  fsagent -pair : it asks the running agent for a code and shows it.
+// runPairCommand is  perigee -pair : it asks the running agent for a code and shows it.
 // It returns the exit code.
 func runPairCommand(c *Console, runtimePath string, drawQR bool) int {
 	rt, err := readRuntime(runtimePath)

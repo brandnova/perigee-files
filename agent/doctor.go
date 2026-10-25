@@ -647,9 +647,9 @@ func checkFirewall(e *doctorEnv) (Check, bool) {
 func firewallAdvice(port int) string {
 	switch runtime.GOOS {
 		case "windows":
-			return "Windows asks the first time the agent runs. If you chose Cancel or Public only: Windows Security > Firewall & network protection > Allow an app through firewall > fsagent, and tick Private."
+			return "Windows asks the first time the agent runs. If you chose Cancel or Public only: Windows Security > Firewall & network protection > Allow an app through firewall > perigee, and tick Private."
 		case "darwin":
-			return "macOS asks the first time the agent runs. If you chose Deny: System Settings > Network > Firewall > Options, and allow incoming connections for fsagent."
+			return "macOS asks the first time the agent runs. If you chose Deny: System Settings > Network > Firewall > Options, and allow incoming connections for perigee."
 	}
 	return fmt.Sprintf("If you use a firewall (firewalld, ufw), allow TCP port %d from your local network.", port)
 }
@@ -760,7 +760,7 @@ func printDoctor(c *Console, checks []Check) {
 	}
 }
 
-// runDoctorCommand is  fsagent -doctor . It returns the exit code: 1 when something needs fixing.
+// runDoctorCommand is  perigee -doctor . It returns the exit code: 1 when something needs fixing.
 func runDoctorCommand(c *Console, configPath, logPath string) int {
 	in := DoctorInput{ConfigPath: configPath, LogPath: logPath, Discovery: "auto"}
 	cfg, err := ReadConfig(configPath)

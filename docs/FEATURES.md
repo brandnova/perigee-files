@@ -33,7 +33,7 @@ Living document. Update it whenever a feature is added, changed, or moved betwee
 - [x] LAN IP auto-detection (default-route interface, virtual interfaces skipped) and `-host` override
 - [x] `-dump` debug flag (prints the index as NDJSON and exits)
 - [x] Graceful shutdown on Ctrl+C
-- [x] mDNS advertising of `_fs-sync._tcp` (device id and name only, never the token), limited to the LAN interface; `-no-mdns` flag
+- [x] mDNS advertising of `_fs-sync._tcp` (later renamed `_perigee._tcp`, see 2026-10-22) (device id and name only, never the token), limited to the LAN interface; `-no-mdns` flag
 - [x] `/index` is gzip-compressed for clients that ask for it, and each sync is logged with entries, encoding, bytes sent and duration
 
 ## Mobile (Expo): shipped
@@ -106,9 +106,9 @@ Small features that fit the project's core job of finding your files from your p
 - [x] Ignore-rules editor with a "test a path" box (S)
 - [x] Start on login (Windows registry, macOS LaunchAgent, Linux autostart or systemd user unit) (M)
 - [x] Launchers per OS: Windows shortcut/installer, macOS .app, Linux .desktop entry and icon (M)
-- [x] Troubleshooter: `fsagent doctor` and a web page (M)
+- [x] Troubleshooter: `fsagent doctor` (now `perigee -doctor`) and a web page (M)
 - [x] Dashboard redesign: sidebar app, getting-started checklist, dialogs, toasts, logo from `static/images/` (M) (new)
-- [x] Agent log file (timestamped, rotating) with a log viewer, "Report a problem" and `fsagent -report` (M) (new)
+- [x] Agent log file (timestamped, rotating) with a log viewer, "Report a problem" and `fsagent-report` (now `perigee -report`) (M) (new)
 - [x] Windows `.exe` icon and version info embedded (S) (new)
 - [x] Icons for macOS and Linux through the `.app` bundle and `.desktop` file (part of the launchers item)
 
@@ -141,13 +141,13 @@ Must be finished before any feature that serves file contents.
 - [x] Interrupted downloads come back with "Try again" after the app restarts
 - [x] Bottom navigation highlight polished; the app no longer requests the microphone permission
 - [x] A project context, file map and tree script for new chats (docs/PROJECT_CONTEXT.md, docs/FILE_MAP.md, scripts/project-tree.sh)
-- [ ] Windows arm64 icon resource (run `go-winres make --arch amd64,386,arm64`, then check agent/rsrc_windows_*.syso)
+- [x] Windows arm64 icon resource (run `go-winres make --arch amd64,386,arm64`, then check agent/rsrc_windows_*.syso)
 
 ## Milestone 8: Publishing
 - [x] Linux packages (.deb, .rpm) on every release
 - [~] Homebrew tap and Scoop bucket: repos and token are ready; the first stable tag publishes to them
 - [ ] winget: manual first submission once v0.1.0 is out
-- [ ] AUR package (`perigee-bin`) once v0.1.0 is out; COPR or a hosted APT/RPM repository later, if people ask
+- [ ] AUR package (`perigee -bin`) once v0.1.0 is out; COPR or a hosted APT/RPM repository later, if people ask
 - [ ] Windows code signing via SignPath Foundation (after launch)
 - [ ] macOS Developer ID signing and notarization in a macOS runner job (with the Apple account)
 - [ ] Google Play: company account (waiting on a D-U-N-S number), listing, data safety, a test track (the 12-tester closed test only if the account type requires it), production
@@ -199,7 +199,7 @@ Good ideas that don't block anything. Pull one into a milestone when it becomes 
 - 2026-10-05: Phases 1 and 2 complete. Pairing QR display added to the agent (not in the original plan).
 - 2026-10-05: Phases 3 to 7 complete. mDNS advertising and discovery, auto-reconnect, Lucide icons.
 - 2026-10-05: Post-MVP roadmap reordered into milestones.
-- 2026-10-05: Milestone 1 batch: config in the OS config folder, `-version`, `-pair`, `-rotate-token`, auth rate-limiting, sensitive-name ignores, API compatibility check, tests and CI, release pipeline. Relicensed to AGPL-3.0-or-later.
+- 2026-10-05: Milestone 1 batch: config in the OS config folder, `-version`, `-pair`, `-rotate-token`, auth rate-limiting, sensitive-name ignores, API compatibility check, tests and CI, release pipeline. Relicensed to AGPL-3.0-or-later. (Later decision: the project is licensed MIT; see LICENSE.)
 - 2026-10-07: Milestone 1 complete apart from the macOS test: CI green on all systems, `v0.1.0-rc1` published with the APK.
 - 2026-10-07: Milestone 2, batch A: OS-aware default folders and ignores, hidden files skipped by default (`include_hidden`), `allowed_networks` for VPN use.
 - 2026-10-07: Milestone 2, batch B: Browse tabs (Browse, Recent, Pinned), copy path/name, pinned folders, auto-sync on open, per-folder summary on Home, file-type icons. Fixed the breadcrumbs being cropped on long lists.
@@ -212,7 +212,7 @@ Good ideas that don't block anything. Pull one into a milestone when it becomes 
 - 2026-10-11: Milestone 4, slice 2: Folders and Privacy pages with live settings reload, agent log file with viewer and problem reports, redesigned dashboard.
 - 2026-10-12: Milestone 4, slice 3: start on login on all three systems, macOS app and Linux packages, "Made by Brand Nova" credit in the agent and app.
 - 2026-10-12: Published v0.1.0-rc2 (pre-release) for Windows and macOS testing.
-- 2026-10-12: Milestone 4, slice 4: `fsagent -doctor` and the dashboard's "Check my setup" page. Milestone 4 complete.
+- 2026-10-12: Milestone 4, slice 4: `fsagent-doctor` (now `perigee -doctor`) and the dashboard's "Check my setup" page. Milestone 4 complete.
 - 2026-10-12: Milestone 5, slice 1: per-phone keys, one-time pairing codes, paired-phones list.
 - 2026-10-13: Milestone 6, slice 1: the agent can send files (off by default), trusted-network banners.
 - 2026-10-13: Milestone 6, slice 2: open, preview and share files in the app.
@@ -225,3 +225,4 @@ Good ideas that don't block anything. Pull one into a milestone when it becomes 
 - 2026-10-23: Opt-in update check (the PC asks GitHub once a day; the phone shows "Update available"); privacy wording made exact; store listing text, data-safety answers and a feature graphic prepared; Homebrew and Scoop publishing wired into the release; code-signing decisions recorded.
 - 2026-10-24: Multi-select and folder downloads in the app; interrupted downloads are recovered with Try again; release notes and test plan for the update check (rc5); project context, file map and tree script added for moving the work into a Claude Project.
 - 2026-10-25: Published v0.1.0-rc5 (pre-release): opt-in update check, multi-select and folder downloads, interrupted downloads recovered, a total-downloads counter on the landing page, and the project context and file map for new chats.
+- 2026-10-25: Stable-ready pass: app.json now matches the Perigee names (app name, package and bundle ID com.brandnova.perigee, local-network text) and the microphone permission is blocked at every level, including the camera plugin (the 10-21 removal had not reached app.json); leftover fsagent/fsindexer names removed from the agent (firewall help, report file name, session cookie, temp files); npm package renamed to perigee; PRIVACY date corrected; Windows arm64 icon resource regenerated.
